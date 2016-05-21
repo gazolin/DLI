@@ -20,6 +20,20 @@ from subprocess import Popen, PIPE
 from HTMLParser import HTMLParser
 from zipfile import *
 
+my_file = 0
+my_link = ''
+
+def set_my_link(str):
+    global my_link
+    my_link = str
+
+def set_my_file_one():
+    global my_file
+    my_file = 1
+
+def set_my_file_zero():
+    global my_file
+    my_file = 0
 
 def with_color(c, s):
     return "\x1b[%dm%s\x1b[0m" % (c, s)
@@ -115,6 +129,9 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 other.sendall(data)
 
     def do_GET(self):
+
+        global my_file
+
         if self.path == 'http://proxy2.test/':
             self.send_cacert()
             return
@@ -170,7 +187,14 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             res_body_plain = res_body_modified
             res_body = self.encode_content_body(res_body_plain, content_encoding)
             res.headers['Content-Length'] = str(len(res_body))
-
+            #put inspection page and not the download file
+            print "\n\n didnt change %d \n\n" %my_file
+            if (my_file == 1):
+                res.headers['Content-Type'] = 'text/html'
+            
+            if (my_file == 0):
+                res.headers['Content-Type'] = 'application/exe'
+           
         res_headers = self.filter_headers(res.headers)
 
         self.wfile.write("%s %d %s\r\n" % (self.protocol_version, res.status, res.reason))
@@ -188,7 +212,6 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     do_OPTIONS = do_GET
 
     def filter_headers(self, headers):
-        # http://tools.ietf.org/html/rfc2616#section-13.5.1
         hop_by_hop = ('connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization', 'te', 'trailers', 'transfer-encoding', 'upgrade')
         for k in hop_by_hop:
             del headers[k]
@@ -323,31 +346,44 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
     #receive the file content
         #check if its EXE
-        if (res_body[0:2] == 'MZ'):
+        if (res_body[0:2] == 'MZ' and my_file == 0):
+            print "\n\n %d \n\n" %my_file
+            set_my_file_one()
+            print "\n\n %d \n\n" %my_file
             response_file = urllib2.urlopen(req_path)
             html_data = response_file.read()
-            html_file = open('current_page.exe', 'w')
+            html_file = open('exe_file.exe', 'w')
             html_file.write(html_data)
             html_file.close()
 
-        #modify the file into zip with a report doc
-           
-            zip_arch = ZipFile('current_download.zip', 'w')
-            zip_arch.write('report.txt')
-            zip_arch.write('current_page.exe')
-            zip_arch.close()
-
-        #send web page with link to new file
+        #send my web page with link to file
             data = ''
-            current_page = open('current_download.zip', 'r')
-            for line in current_page:
-                data = data + line
+            my_html = open('html_download_page.html', 'r')
+            for line in my_html:
+                if (line[0:8] == '<a href='):
+                    data = data + '<a href=\"%s\" download>' %req_path
+                else:
+                    data = data + line
 
-            current_page.close()
+            my_html.close()
             return data
-        #not a file
+
+        #download file from my page
         else:
-            pass
+            if (my_file == 1 and self.path[-3:] == 'exe'):
+                print "\n\n IM HERER!!! \n\n"
+                set_my_file_zero()
+                data = ''
+                exe_file = open('exe_file.exe', 'r')
+                for line in exe_file:
+                    data = data + line
+
+                exe_file.close()
+                return data
+
+            else:
+                pass
+
 
     def save_handler(self, req, req_body, res, res_body):
      """   self.print_info(req, req_body, res, res_body)"""
