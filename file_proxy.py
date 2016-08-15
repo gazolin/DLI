@@ -20,20 +20,8 @@ from subprocess import Popen, PIPE
 from HTMLParser import HTMLParser
 from zipfile import *
 
-my_file = 0
-my_link = ''
 
-def set_my_link(str):
-    global my_link
-    my_link = str
 
-def set_my_file_one():
-    global my_file
-    my_file = 1
-
-def set_my_file_zero():
-    global my_file
-    my_file = 0
 
 def with_color(c, s):
     return "\x1b[%dm%s\x1b[0m" % (c, s)
@@ -130,7 +118,6 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
 
-        global my_file
 
         if self.path == 'http://proxy2.test/':
             self.send_cacert()
@@ -187,14 +174,10 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             res_body_plain = res_body_modified
             res_body = self.encode_content_body(res_body_plain, content_encoding)
             res.headers['Content-Length'] = str(len(res_body))
-            #put inspection page and not the download file
-            print "\n\n didnt change %d \n\n" %my_file
-            if (my_file == 1):
-                res.headers['Content-Type'] = 'text/html'
             
-            if (my_file == 0):
-                res.headers['Content-Type'] = 'application/exe'
-           
+            #put inspection page and not the download file - this may cause problems later!!!!
+            res.headers['Content-Type'] = 'text/html'
+       
         res_headers = self.filter_headers(res.headers)
 
         self.wfile.write("%s %d %s\r\n" % (self.protocol_version, res.status, res.reason))
@@ -341,18 +324,14 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     def request_handler(self, req, req_body):
         pass
 
-#check if the html is a file. if it is, download it and send back to client after security check and report is added
+#check if the html is a file. if it is, download it and send back to client after security check. report is added
     def response_handler(self, req, req_body, req_path, res, res_body):
-
     #receive the file content
         #check if its EXE
-        if (res_body[0:2] == 'MZ' and my_file == 0):
-            print "\n\n %d \n\n" %my_file
-            set_my_file_one()
-            print "\n\n %d \n\n" %my_file
+        if (res_body[0:2] == 'MZ'):
             response_file = urllib2.urlopen(req_path)
             html_data = response_file.read()
-            html_file = open('exe_file.exe', 'w')
+            html_file = open('html/exe_file.exe', 'w')
             html_file.write(html_data)
             html_file.close()
 
@@ -360,29 +339,15 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             data = ''
             my_html = open('html_download_page.html', 'r')
             for line in my_html:
-                if (line[0:8] == '<a href='):
-                    data = data + '<a href=\"%s\" download>' %req_path
-                else:
-                    data = data + line
+                data = data + line
 
             my_html.close()
             return data
 
         #download file from my page
+    
         else:
-            if (my_file == 1 and self.path[-3:] == 'exe'):
-                print "\n\n IM HERER!!! \n\n"
-                set_my_file_zero()
-                data = ''
-                exe_file = open('exe_file.exe', 'r')
-                for line in exe_file:
-                    data = data + line
-
-                exe_file.close()
-                return data
-
-            else:
-                pass
+            pass
 
 
     def save_handler(self, req, req_body, res, res_body):
