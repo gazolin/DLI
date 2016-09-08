@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
+import subprocess
+import shlex
 import socket
 import ssl
 import select
@@ -324,6 +326,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     def request_handler(self, req, req_body):
         pass
 
+
 #check if the html is a file. if it is, download it and send back to client after security check. report is added
     def response_handler(self, req, req_body, req_path, res, res_body):
     #receive the file content
@@ -342,17 +345,27 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 data = data + line
 
             my_html.close()
+
+        #analyze with cuckoo
+        #creating a seperate thread for cuckoo to run on while client gets secure page
+        #showing wait bar and finish signal to client
+            os.system('cd /home/uri/cuckoo/utils/; python submit.py /home/uri/DLI/html/exe_file.exe')
+            thread = threading.Thread(target = threaded_function, args = ())
+            thread.start()
+
             return data
 
         #download file from my page
     
         else:
             pass
-
-
+        
     def save_handler(self, req, req_body, res, res_body):
      """   self.print_info(req, req_body, res, res_body)"""
 
+def threaded_function():
+    os.system('cd /home/uri/cuckoo/; python cuckoo.py')
+    print "running cuckoo"
 
 def test(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer, protocol="HTTP/1.1"):
     if sys.argv[1:]:
