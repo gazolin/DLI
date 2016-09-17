@@ -337,8 +337,10 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             html_file = open('html/exe_file.exe', 'w')
             html_file.write(html_data)
             html_file.close()
+            os.chmod('html/exe_file.exe', 0600)
 
-        #send my web page with link to file
+
+        #send my web page with link to file and analysis
             data = ''
             my_html = open('html_download_page.html', 'r')
             for line in my_html:
@@ -349,7 +351,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         #analyze with cuckoo
         #creating a seperate thread for cuckoo to run on while client gets secure page
         #showing wait bar and finish signal to client
-            os.system('cd /home/uri/cuckoo/utils/; python submit.py /home/uri/DLI/html/exe_file.exe')
+            os.system('cd /home/uri/cuckoo/utils/; python submit.py --timeout 60 /home/uri/DLI/html/exe_file.exe')
             thread = threading.Thread(target = threaded_function, args = ())
             thread.start()
 
@@ -363,6 +365,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     def save_handler(self, req, req_body, res, res_body):
      """   self.print_info(req, req_body, res, res_body)"""
 
+#thread on which cuckoo will run
 def threaded_function():
     os.system('cd /home/uri/cuckoo/; python cuckoo.py')
     print "running cuckoo"
