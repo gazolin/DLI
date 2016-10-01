@@ -331,18 +331,21 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     def response_handler(self, req, req_body, req_path, res, res_body):
     #receive the file content
         #check if its EXE
-        if (res_body[0:2] == 'MZ'):
+        
+        print  '\n\n' + req_path[-4:] + '\n\n'
+        if (res_body[0:2] == 'MZ' or req_path[-4:] == '.exe' or req_path[-4:] == '.bin'):
+            
             response_file = urllib2.urlopen(req_path)
             html_data = response_file.read()
-            html_file = open('html/exe_file.exe', 'w')
+            html_file = open('server/exe_file.exe', 'w')
             html_file.write(html_data)
             html_file.close()
-            os.chmod('html/exe_file.exe', 0600)
-
+            #executing the file is not allowed on the server
+            os.chmod('server/exe_file.exe', 0600)
 
         #send my web page with link to file and analysis
             data = ''
-            my_html = open('html_download_page.html', 'r')
+            my_html = open('server/html_download_page.html', 'r')
             for line in my_html:
                 data = data + line
 
@@ -351,9 +354,14 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         #analyze with cuckoo
         #creating a seperate thread for cuckoo to run on while client gets secure page
         #showing wait bar and finish signal to client
-            os.system('cd /home/uri/cuckoo/utils/; python submit.py --timeout 60 /home/uri/DLI/html/exe_file.exe')
-            thread = threading.Thread(target = threaded_function, args = ())
+
+
+            os.system('cd /home/uri/cuckoo/utils/; python submit.py --timeout 80 /home/uri/DLI/server/exe_file.exe')
+            thread = threading.Thread(target = cuckoo_thread, args = ())
             thread.start()
+
+            my_site_thread = threading.Thread(target = site_thread, args = ())
+            my_site_thread.start()
 
             return data
 
@@ -366,9 +374,38 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
      """   self.print_info(req, req_body, res, res_body)"""
 
 #thread on which cuckoo will run
-def threaded_function():
+def cuckoo_thread():
     os.system('cd /home/uri/cuckoo/; python cuckoo.py')
-    print "running cuckoo"
+
+def site_thread():
+    current_file_number = fcount("/home/uri/cuckoo/storage/analyses", {})
+    log_path = "/home/uri/cuckoo/storage/analyses/" + str(current_file_number) + "/analysis.log"
+    while (os.path.isfile(log_path) == False):
+            print "still here, path is: " + log_path
+            time.sleep(5)
+
+    print "out of here"
+    #redirection page is given only when cuckoo's tests are done
+    looking_for = "INFO: Analysis completed."
+    is_end = False
+    while (is_end == False):
+        log_file = open(log_path, 'r')
+        print "searching..."
+        for line in log_file:
+            if looking_for in line:
+                print "inspection with cuckoo is done"
+                is_end = True
+        time.sleep(5)
+
+
+def fcount(path, map = {}):
+    count = 0
+    for f in os.listdir(path):
+        child = os.path.join(path, f)
+        if os.path.isdir(child):
+          count +=  1 # unless include self
+    map[path] = count
+    return count
 
 def test(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer, protocol="HTTP/1.1"):
     if sys.argv[1:]:
