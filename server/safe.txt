@@ -1,0 +1,14 @@
+<div class="col-md-3">
+                    <i class="fa fa-check color-blue fa-4x" ></i>
+                    <h2>Analysis Done.</h2>
+                </div>
+
+                <div class="col-md-3">
+                    <h4> DLI scores this file: out of 10.</h4>
+                    <h3>Shuold be safe </h3>
+                </div>
+
+                <div class="col-md-3">
+                    <i class="fa fa-bug color-blue fa-4x"></i>
+                    <a href="http://127.0.0.1:7998/analysis"><h2>View Report</h2></a>
+                </div>

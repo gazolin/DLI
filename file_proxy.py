@@ -331,8 +331,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     def response_handler(self, req, req_body, req_path, res, res_body):
     #receive the file content
         #check if its EXE
-        
-        print  '\n\n' + req_path[-4:] + '\n\n'
+
         if (res_body[0:2] == 'MZ' or req_path[-4:] == '.exe' or req_path[-4:] == '.bin'):
             
             response_file = urllib2.urlopen(req_path)
@@ -343,12 +342,23 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             #executing the file is not allowed on the server
             os.chmod('server/exe_file.exe', 0600)
 
-        #send my web page with link to file and analysis
+            #send my web page with link to file and analysis
             data = ''
             my_html = open('server/html_download_page.html', 'r')
             for line in my_html:
                 data = data + line
+            #copy template for index
+            index_template_path = "/home/uri/DLI/server/index_template.html"
+            index_path = "/home/uri/DLI/server/index.html"
 
+            index_template = open(index_template_path, 'r')
+            index = open(index_path, 'w')
+
+            for line in index_template:
+                index.write(line)
+
+            index.close()
+            index_template.close()
             my_html.close()
 
         #analyze with cuckoo
@@ -387,16 +397,79 @@ def site_thread():
     print "out of here"
     #redirection page is given only when cuckoo's tests are done
     looking_for = "INFO: Analysis completed."
+    error_ = "INFO: Analysis timeout hit, terminating analysis."
     is_end = False
     while (is_end == False):
         log_file = open(log_path, 'r')
         print "searching..."
         for line in log_file:
             if looking_for in line:
-                print "inspection with cuckoo is done"
+                print "inspection with cuckoo is done."
                 is_end = True
+
+            else:
+                if error_ in line:
+                    print "inspection with cuckoo timed out."
+                    is_end = True
+                
         time.sleep(5)
 
+    #add some information in the web page from jason
+    time.sleep(5)
+    report_path = "/home/uri/cuckoo/storage/analyses/" + str(current_file_number) + "/reports/report.json"
+    #wait for the report to be done
+    while (os.path.isfile(report_path) == False):
+            time.sleep(5)
+    jason = open(report_path, 'r')
+    score = ""
+    for line in jason:
+        if "score" in line:
+            for letter in line:
+                if ord(letter) >= 48 and ord(letter) <= 57 or letter == '.':
+                    score = score + letter
+            break
+    jason.close()
+    score = float(score)
+
+    #change the site according to summery, site refreshing every 5 seconds
+    index_template_path = "/home/uri/DLI/server/index_template.html"
+    index_path = "/home/uri/DLI/server/index.html"
+
+    index_template = open(index_template_path, 'r')
+    index = open(index_path, 'w')
+
+    safe = open("/home/uri/DLI/server/safe.txt", 'r+')
+    danger = open("/home/uri/DLI/server/danger.txt", 'r+')
+
+    safe_mode = ""
+    danger_mode = ""
+
+    for line in safe:
+        if "<h4> DLI scores this file: out of 10.</h4>" in line:
+            safe_mode = safe_mode + "<h4> DLI scores this file: " + str(score) + " out of 10.</h4>"
+        else:
+            safe_mode = safe_mode + line
+
+    for line in danger:
+        if "<h4> DLI scores this file: out of 10.</h4>" in line:
+            danger_mode = danger_mode + "<h4> DLI scores this file: " + str(score) + " out of 10.</h4>"
+        else:
+            danger_mode = danger_mode + line
+
+    safe.close()
+    danger.close()
+    #html code for resaults
+    for line in index_template:
+        if "<i class=\"fa fa-spinner" in line:
+            if(score > 2.9):
+                index.write(danger_mode)
+            else:
+                index.write(safe_mode)
+        else:   
+            index.write(line)
+
+    index.close()
+    index_template.close()
 
 def fcount(path, map = {}):
     count = 0
