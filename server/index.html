@@ -10,7 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <meta http-equiv="refresh" content="5; URL=http://127.0.0.1:7999/">
     <!--[if IE]>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <![endif]-->
@@ -86,22 +85,33 @@
     <!--analysis Section-->
     <section class="for-full-back color-light" id="analysis">
         <h1><font color="black">ANALYSIS</font></h1>
-        <div class="container" id="p1">
+        <div class="container">
                 <div class="row text-center space-pad">
-<div class="col-md-3">
+<div class="col-md-4">
                     <i class="fa fa-check color-blue fa-4x" ></i>
                     <h2>Analysis Done.</h2>
                 </div>
 
-                <div class="col-md-3">
-<h4> DLI scores this file: 4.0 out of 10.</h4>                    <h3>This file might be malicious, you should check the analysis before downloading. </h3>
+                <div class="col-md-4">
+<h3> DLI scores this file: 1.2 out of 10.</h3>                    <h4>Shuold be safe </h4>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <i class="fa fa-bug color-blue fa-4x"></i>
                     <a href="http://127.0.0.1:7998/analysis"><h2>View Report</h2></a>
-                </div>                </div>
+                </div>
+	</div>
+
+        <div classs="container">
+             <h3>Screenshots:</h3><div class="row text-center space-pad">
+                <img src="1.jpg" alt="" style="width:300px;height:200px;"> 
+                <img src="2.jpg" alt="" style="width:300px;height:200px;"> 
+                <img src="3.jpg" alt="" style="width:300px;height:200px;"> 
+            </div>
         </div>
+                </div>
+        </div>
+
     </section>   
    
     <!--End analysis Section-->
@@ -119,27 +129,6 @@
     </section>  
 
     <!--End go back Section-->
-
-
-    <script>
-    function loadDoc() {
-      var xhttp;
-      if (window.XMLHttpRequest) {
-        // code for modern browsers
-        xhttp = new XMLHttpRequest();
-        } else {
-        // code for IE6, IE5
-        xhttp = new ActiveXObject("Microsoft.XMLHTTP");
-      }
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("spinner").innerHTML = this.responseText;
-        }
-      };
-      xhttp.open("GET", "ajax_info.txt", true);
-      xhttp.send();
-    }
-    </script>
 
     <!--footer Section -->
     <div class="for-full-back " id="footer">

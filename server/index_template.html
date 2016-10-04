@@ -86,11 +86,12 @@
     <!--analysis Section-->
     <section class="for-full-back color-light" id="analysis">
         <h1><font color="black">ANALYSIS</font></h1>
-        <div class="container" id="p1">
+        <div class="container">
                 <div class="row text-center space-pad">
                     <i class="fa fa-spinner fa fa-spin color-blue fa-4x"></i><h2>Please wait while DLI server is analyzing the file.</h2>
                 </div>
         </div>
+
     </section>   
    
     <!--End analysis Section-->
@@ -108,27 +109,6 @@
     </section>  
 
     <!--End go back Section-->
-
-
-    <script>
-    function loadDoc() {
-      var xhttp;
-      if (window.XMLHttpRequest) {
-        // code for modern browsers
-        xhttp = new XMLHttpRequest();
-        } else {
-        // code for IE6, IE5
-        xhttp = new ActiveXObject("Microsoft.XMLHTTP");
-      }
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("spinner").innerHTML = this.responseText;
-        }
-      };
-      xhttp.open("GET", "ajax_info.txt", true);
-      xhttp.send();
-    }
-    </script>
 
     <!--footer Section -->
     <div class="for-full-back " id="footer">

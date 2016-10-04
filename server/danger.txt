@@ -1,14 +1,23 @@
-<div class="col-md-3">
+<div class="col-md-4">
                     <i class="fa fa-check color-blue fa-4x" ></i>
                     <h2>Analysis Done.</h2>
                 </div>
 
-                <div class="col-md-3">
-                    <h4> DLI scores this file: out of 10.</h4>
-                    <h3>This file might be malicious, you should check the analysis before downloading. </h3>
+                <div class="col-md-4">
+                    <h3> DLI scores this file: out of 10.</h3>
+                    <h4>This file might be malicious, you should check the analysis before downloading. </h4>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <i class="fa fa-bug color-blue fa-4x"></i>
-                    <a href="http://127.0.0.1:7998/analysis"><h2>View Report</h2></a>
+                    <a href="http://127.0.0.1:7998/analysis"><h2>View Analysis</h2></a>
                 </div>
+
+</div>
+        <div classs="container">
+           <h3>Screenshots:</h3><div class="row text-center space-pad">
+                <img src="1.jpg" alt="" style="width:300px;height:200px;"> 
+                <img src="2.jpg" alt="" style="width:300px;height:200px;"> 
+                <img src="3.jpg" alt="" style="width:300px;height:200px;"> 
+            </div>
+        </div>
